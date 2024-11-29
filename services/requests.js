@@ -26,13 +26,27 @@ const getAllActivities = (req, res) => {
     })
     .catch(err => console.log(err));
 }
-
+//Newly updated
 const getSingleActivity = (req, res) => {
-  fetch('https://www.boredapi.com/api/activity') // fetch activity from bored API - https://www.boredapi.com/about
-    .then(data => data.json()) // return a promise containing the response
-    .then(json => res.json(json)) // extract the JSON body content from the response (specifically the activity value) and sends it to the client
-    .catch((err) => console.log(err)) // log errors to the console
+  fetch('https://www.boredapi.com/api/activity')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        return response.json();
+      } else {
+        throw new Error("Received non-JSON response");
+      }
+    })
+    .then(json => res.json(json))
+    .catch(err => {
+      console.error("Error fetching activity:", err);
+      res.status(500).json({ error: "Failed to fetch activity" });
+    });
 }
+
 
 const addActivityToDB = (req, res) => {
   const activity = [ req.body.activity ]
